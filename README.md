@@ -18,9 +18,21 @@ A high-performance CLI tool for mass downloading subtitles (captions) from YouTu
 
 ### Option 1: From Source
 
+**Windows:**
 1. Clone or download this repository
-2. Run `setup.bat` (Windows) to create a virtual environment and install dependencies
+2. Run `setup.bat` to create a virtual environment and install dependencies
 3. Run `start.bat` to launch the tool
+
+**Linux (including Arch):**
+1. Clone this repository
+2. Run `./setup.sh` to create a virtual environment and install dependencies
+3. Run `./start.sh` to launch the tool
+
+On Arch, install Python and Chromium first if you don't have them:
+```bash
+sudo pacman -S python chromium
+```
+The tool works with either Chromium or Google Chrome — it auto-detects an installed browser and prefers a system-installed `chromedriver` (matched to your browser version by the package manager) over downloading one, which avoids version-mismatch errors. If no matching browser/driver is found, the tool still works — it just skips automatic proxy-list fetching.
 
 ### Option 2: Windows Executable
 
@@ -30,7 +42,7 @@ No Python installation required. Place the exe in any folder on your PC and run 
 ## Requirements
 
 - Python 3.8 or newer
-- Google Chrome (for proxy fetching via Selenium)
+- Chromium or Google Chrome (for proxy fetching via Selenium; optional — the tool degrades gracefully without it)
 
 ## Usage
 

@@ -9,6 +9,7 @@ import json
 import os
 import random
 import re
+import shutil
 import sys
 import threading
 import time
@@ -103,7 +104,17 @@ def download_fresh_proxies(proxy_file: str = PROXY_FILE) -> int:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--log-level=3")  # Suppress Chrome logs
-        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+
+        # Prefer a system-installed chromedriver (kept version-matched with the
+        # system browser by the OS package manager) over webdriver-manager's
+        # auto-download, which can fetch a driver version that doesn't match
+        # a distro-packaged browser (e.g. Chromium on Arch) and fail to start.
+        system_driver = shutil.which("chromedriver")
+        if system_driver:
+            driver_path = system_driver
+        else:
+            driver_path = ChromeDriverManager().install()
+        driver = webdriver.Chrome(service=ChromeService(driver_path), options=options)
 
         url = "https://free-proxy-list.net/en/"
         driver.get(url)
@@ -140,8 +151,10 @@ def download_fresh_proxies(proxy_file: str = PROXY_FILE) -> int:
 # Configuration
 # ============================================================================
 
-# Threading settings (reduced to avoid rate limiting)
-DEFAULT_THREADS = 2
+# Threading settings (benchmarked 2026-08-09: 16 threads cleared a 7-video
+# playlist in 185s with 0 failures and no hang; 8 and 24 hung post-completion,
+# 4 was too slow under proxy contention)
+DEFAULT_THREADS = 16
 MAX_THREADS = 1000
 MIN_THREADS = 1
 THREAD_DELAY_MIN = 1.5
